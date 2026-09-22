@@ -1,0 +1,284 @@
+/*
+ * Peer federation surfaces: the sidebar peer-workspace section (rendered
+ * inside the official workspace list) and the center-column peer session
+ * view (iframes over the official conversation area). Visual language
+ * follows the official sidebar rows: 13px titles, subtle hover fills, a
+ * green running dot; every color rides official alias tokens so both
+ * official themes hold.
+ */
+
+/* ---------- sidebar: peer workspace section ---------- */
+
+/* The section reads as a PEER of the official `工作区` heading rather than as one
+   more project folder, so it carries no folder icon and its title starts at the
+   same inset that heading uses. Measured from the official stylesheet: the region
+   that holds the heading has no left padding, the heading itself sets
+   `padding-left: 4px`, and the scrolling list we mount into nets to zero
+   (`margin-left: -4px` cancelling `padding-left: 4px`). A 4px head inset therefore
+   lines the title up with `工作区`, and the body's 8px inset lines the rows up with
+   the official project rows. */
+.section {
+  margin: 4px 0 8px;
+  padding: 0;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sectionHead:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.sectionTitle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  display: inline-flex;
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform 0.15s ease;
+}
+
+.chevron[data-open='false'] {
+  transform: rotate(-90deg);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 0 8px;
+}
+
+.sectionEmpty {
+  margin: 2px 0 4px;
+  padding: 0 8px;
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.projectBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* A workspace row plus its new-conversation affordance. */
+.projectLine {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.projectLine > .projectRow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Start a conversation in this workspace. Revealed on hover/focus like the
+   open-in-browser affordance, so the rows stay quiet at rest. */
+.newConversationRow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  padding: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.projectLine:hover .newConversationRow,
+.projectLine:focus-within .newConversationRow,
+.projectSoloRow:hover .newConversationRow,
+.projectSoloRow:focus-within .newConversationRow {
+  opacity: 1;
+}
+
+.newConversationRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.newConversationRow:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 1px;
+}
+
+.projectRow,
+.projectSoloRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+}
+
+.rowIcon {
+  display: inline-flex;
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.projectRow {
+  cursor: pointer;
+}
+
+.projectRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.projectSoloRow {
+  /* A single-session workspace renders its label as a static caption. */
+  color: var(--dsw-alias-label-primary);
+}
+
+.projectTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 8px 5px 30px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sessionRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.sessionRowActive,
+.sessionRowActive:hover {
+  background: var(--dsw-alias-interactive-bg-active);
+}
+
+.sessionTitle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runningDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-state-success-primary);
+}
+
+.sessionTime {
+  flex: none;
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 11.5px;
+}
+
+/* ---------- center column: peer session view ---------- */
+
+.view {
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
+  background: var(--dsw-alias-bg-base);
+}
+
+/* Collapsed (a local session is open): the container must not paint over the
+   official conversation area — it kept an opaque full-bleed background, which
+   blanked the local session until restart. The iframes stay mounted below. */
+.view[data-collapsed='true'] {
+  display: none;
+}
+
+/* The frames stack full-bleed; only the focused one is visible. Opacity
+   (never the hidden attribute) toggles between them: the desktop app runs
+   in GPU compatibility (software rendering) mode, where an iframe that was
+   hidden and then shown repaints as a blank white surface — opacity keeps
+   every frame in the render pipeline the whole time. */
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  opacity: 1;
+}
+
+.frame[data-active='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Session line: the open row plus the hover-revealed "open in browser"
+   affordance for the desktop window's iframe compositing limitation. */
+.sessionLine {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sessionLine > .sessionRow {
+  flex: 1;
+  min-width: 0;
+}
+
+.externalRow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary-foreground, inherit);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.sessionLine:hover .externalRow,
+.externalRow:focus-visible {
+  opacity: 1;
+}

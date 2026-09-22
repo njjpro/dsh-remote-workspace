@@ -1,0 +1,13 @@
+# Normalize line endings to LF in the repository regardless of the platform's
+# git config: the sources are LF, and letting a Windows checkout rewrite them to
+# CRLF makes every later diff carry whole-file churn.
+* text=auto eol=lf
+
+# Binary assets must never be normalized.
+*.png binary
+*.jpg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

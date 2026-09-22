@@ -1,0 +1,12 @@
+# Bundle patch for the remote-workspace plugin: inserts its plugin row into the web
+# profile roster. Applied as a profile bundle layer (the `dsh.bundle.patch` manifest
+# field); install with
+# `dsh plugin --profile web add link:<repo>/packages/dsh-remote-workspace`.
+#
+# This plugin is independent of @linxin666/dsh-remote-web-ui at build time, but it
+# reads that plugin's pairing identity at runtime (the `remoteWebUiPairing` cordis
+# service). Both can be installed together: this package owns /pair-remote/* and
+# /api/pair/peer/*, while that one owns /api/pair/{issue,accept,...} and /pair-app.
+- insert:
+    - id: remote-workspace
+      name: '@njjpro/dsh-remote-workspace'
