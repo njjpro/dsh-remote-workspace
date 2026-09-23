@@ -2,23 +2,39 @@
 
 English | [中文](README.zh.md)
 
-> Device-workspace federation for the dsh web GUI: pair into another DSH instance and browse its projects and sessions from the local sidebar, with each peer session opening in the local center column instead of a separate browser window.
+> **One window, two machines: bring another DSH instance's workspaces into the local sidebar, and open its sessions so the peer's real GUI renders in the local center column — no second browser window, no re-shelling, no peer-side mock.**
 
-This is a standalone plugin package for DeepSeek Harness (DSH). It is a single dual-face package: the host half owns the peer inventory routes a paired instance reads, the loopback embed proxy that republishes the peer GUI, and the control routes the local browser half calls; the browser half renders the collapsible remote-workspace group in the sidebar and hosts each peer session in an iframe.
+This package is the device-workspace federation for the dsh web GUI. After pairing one remote DSH instance:
 
-It is independent of `@linxin666/dsh-remote-web-ui` at build time — no import, no package dependency. It reads that plugin's pairing identity through the `remoteWebUiPairing` cordis service at runtime, which is what makes the two packages installable side by side.
+1. **The remote workspaces behave like local ones.** The peer's projects and sessions appear in the local sidebar, directly beneath this machine's own workspaces, browsed the same way (running dot, relative time, collapsible groups).
+2. **A peer session opens in place, in the local center column.** Clicking one switches the local center column to that session while the local sidebar stays. What renders is the **peer's real GUI**: chat, streaming output, and session switching all run on the peer's backend — not a mock, and not the peer's interface rebuilt here.
+3. **It still costs one window.** No second browser window, no second credential, no second bookmark. That is the substantive difference from opening a tunnel address in another tab.
+4. **New conversations can start on the peer.** Every remote workspace row offers a new-conversation control; the peer creates the session and the local half opens what it returns, so a remote workspace is not limited to sessions that already exist.
 
 ![A peer session open in the local center column, with the paired instance's workspaces and sessions listed under "Remote workspaces" in the sidebar](assets/remote-workspaces.png)
 
 The screenshot is the local GUI: the sidebar lists this machine's own workspaces and, below them, the paired instance's under **远程工作区 / Remote workspaces**; the center column is showing a session running on that other machine. Project names in the capture are pixelated.
 
+## How it works
+
+This is a single dual-face package:
+
+- **Host half** (runs in the DSH host process): serves the peer inventory routes a paired remote instance reads, the loopback embed proxy that republishes the peer GUI, and the control routes the local browser half calls.
+- **Browser half** (runs inside the Web GUI): renders the collapsible remote-workspace group in the sidebar and hosts each peer session in an iframe.
+
+A peer pane loads through the **loopback embed proxy**: the proxy reaches the peer with the device credential and republishes its GUI on a local `127.0.0.1` port, so the browser holds no peer cookie and the pane stays separable from the local UI.
+
+The package is independent of `@linxin666/dsh-remote-web-ui` at build time (no import, no package dependency), and reads that plugin's pairing identity through the `remoteWebUiPairing` cordis service at runtime — pairing itself (minting tokens, revoking, the device cookie) belongs to that plugin, and this one only redeems a token once. The two route tables do not overlap, so both install side by side.
+
 ## What it does
 
-- Lists the paired instance's workspaces (projects) and their sessions in the sidebar, under the official workspace list.
-- Opens a peer session in the local center column, mounted in place of the local conversation rather than in a new browser tab.
-- Starts a new conversation inside a remote workspace: the peer creates the session and the local half opens what it returns.
-- Keeps at most three peer panes mounted at once, so the per-origin connection budget is not exhausted by long-lived streams.
-- Marks each peer surface with `data-dsh-plugin="remote-workspace"` and a bare `data-dsh-part` value, so skins can anchor on it.
+The four points above are the core. The supporting details:
+
+- **Sidebar integration**: the group sits beneath the official workspace list and its fold state persists across reloads, so the section stays as the user left it.
+- **Bounded mounting**: at most three peer panes stay mounted at once, so the per-origin connection budget is not exhausted by long-lived streams.
+- **Session state survives switching**: opening a local session folds the peer view without destroying its frame, so the peer session is still loaded on the next click.
+- **Skin anchorable**: each peer surface carries `data-dsh-plugin="remote-workspace"` and a bare `data-dsh-part` value.
+- **Archived sessions excluded**: the peer leaves archived sessions out of both the session list and workspace membership, so the group only offers sessions that open.
 
 ## Install
 
