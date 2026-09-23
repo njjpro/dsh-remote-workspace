@@ -8,6 +8,10 @@ This is a standalone plugin package for DeepSeek Harness (DSH). It is a single d
 
 It is independent of `@linxin666/dsh-remote-web-ui` at build time — no import, no package dependency. It reads that plugin's pairing identity through the `remoteWebUiPairing` cordis service at runtime, which is what makes the two packages installable side by side.
 
+![A peer session open in the local center column, with the paired instance's workspaces and sessions listed under "Remote workspaces" in the sidebar](assets/remote-workspaces.png)
+
+The screenshot is the local GUI: the sidebar lists this machine's own workspaces and, below them, the paired instance's under **远程工作区 / Remote workspaces**; the center column is showing a session running on that other machine. Project names in the capture are pixelated.
+
 ## What it does
 
 - Lists the paired instance's workspaces (projects) and their sessions in the sidebar, under the official workspace list.
